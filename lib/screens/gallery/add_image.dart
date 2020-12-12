@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:saloon_dashboard/models/constants.dart';
 import 'package:saloon_dashboard/providers/saloon_provider.dart';
 
 class AddImageScreen extends StatefulWidget {
@@ -18,11 +19,13 @@ class _AddImageScreenState extends State<AddImageScreen> {
 
   File _image;
 
+  String err="";
+
   final picker = ImagePicker();
 
   Future getImage() async {
 
-    final pickedFile = await picker.getImage(source: ImageSource.gallery,maxHeight: 200);
+    final pickedFile = await picker.getImage(source: ImageSource.gallery,maxHeight: 800);
 
     setState(() {
       if (pickedFile != null) {
@@ -48,9 +51,26 @@ class _AddImageScreenState extends State<AddImageScreen> {
                 loading=true;
               });
               Provider.of<SaloonProvider>(context,listen: false).addImageToTheGallery(_image)
-              .then((_){
+              .then((val){
+
+                if(val==false){
+                  print('hi $val');
+                  setState(() {
+                    loading=false;
+                    err ="Your image upload limit has come. Please contact our support for more details. We can help you!";
+                  });
+                }
+                else{
+                  setState(() {
+                    loading=false;
+                    err = "Upload Complete!";
+                  });
+                }
+
+              }).catchError((err){
                 setState(() {
                   loading=false;
+                  err = "Some error occurred try again!";
                 });
               });
             },
@@ -99,7 +119,12 @@ class _AddImageScreenState extends State<AddImageScreen> {
               CircularProgressIndicator()
             ],
           )
-              : SizedBox()
+              : SizedBox(),
+
+          err !="" ? Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Text(err,textAlign: TextAlign.center,style: kSaloonName,),
+          ) : SizedBox()
 
 
         ],

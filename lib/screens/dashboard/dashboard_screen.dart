@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:saloon_dashboard/models/constants.dart';
 import 'package:saloon_dashboard/providers/auth_provider.dart';
 import 'package:saloon_dashboard/providers/saloon_provider.dart';
+import 'package:saloon_dashboard/screens/appointments_screen/all_appointments.dart';
 import 'package:saloon_dashboard/screens/dashboard/saloon_found.dart';
 import 'package:saloon_dashboard/screens/gallery/gallery_screen.dart';
 import 'package:saloon_dashboard/screens/services_screen/services_screen.dart';
@@ -54,6 +55,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               RaisedButton(
+                onPressed: (){
+                  Navigator.popAndPushNamed(context,AllAppointmentsScreen.id );
+                },
+                child: Text("Appointments"),),
+              RaisedButton(
                   onPressed: (){
                 Navigator.popAndPushNamed(context, ServicesScreen.id);
               },
@@ -66,7 +72,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               RaisedButton(onPressed: (){
                 Provider.of<AuthProvider>(context,listen: false).signOutGoogle();
               },
-                child: Text('Log outx'),
+                child: Text('Log out'),
                 color: kMainYellowColor,
               )
             ],
@@ -80,7 +86,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 : NoSaloonFound(),
           ),
         ),
-        floatingActionButton: FloatingActionButton(onPressed: (){},),
+
       ),
     );
   }

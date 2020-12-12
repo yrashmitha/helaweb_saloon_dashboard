@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -9,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:saloon_dashboard/models/gallery_image.dart';
 import 'package:saloon_dashboard/models/saloon.dart';
 import 'package:saloon_dashboard/models/service.dart';
+import 'package:saloon_dashboard/providers/appointment_provider.dart';
 import 'package:saloon_dashboard/providers/auth_provider.dart';
 
 class SaloonProvider with ChangeNotifier {
@@ -17,7 +19,7 @@ class SaloonProvider with ChangeNotifier {
 
   Saloon mySaloon;
 
-  List<GalleryImage> allGalleryImages=[];
+  List<dynamic> allGalleryImages=[];
 
   Saloon get myShowRoom {
     return mySaloon;
@@ -88,11 +90,16 @@ class SaloonProvider with ChangeNotifier {
       mySaloon.services = returnMyServicesArray(saloonData.data()["services"]);
       mySaloon.gallery = saloonData.data()['gallery'] == null
           ? []
-          : returnMyGalleryImagesArray(saloonData.data()['gallery']);
+          : saloonData.data()['gallery'];
       mySaloon.galleryLimit = saloonData.data()['gallery_limit'];
       mySaloon.reviews = saloonData.data()['reviews'] == null
           ? []
           : saloonData.data()['reviews'];
+
+
+      final appointments = await Provider.of<AppointmentProvider>(context,listen: false)
+          .getAppointmentsFromDb('sFJLjuDIiT6ZyxeGQ8IA');
+
       print('saloon data getting finished');
     } else {
       print('we have no document');
@@ -217,59 +224,111 @@ class SaloonProvider with ChangeNotifier {
   }
 
   Future<void> getAllGalleryImagesRefresh() async {
+    log('gallery images refreshing');
     allGalleryImages = [];
       try{
-        await FirebaseFirestore.instance
-            .collection('saloons')
+        final saloonData = await FirebaseFirestore.instance
+            .collection('saloons/${mySaloon.id}/data')
             .doc(mySaloon.id)
-            .collection('all_images')
-            .get()
-            .then((value) {
-          value.docs.forEach((element) {
-            allGalleryImages
-                .add(GalleryImage(element.data()['name'], element.data()['url'],element.data()['date_time']));
-          });
-        });
+            .get();
+        mySaloon.description = saloonData.data()['description'];
+        mySaloon.additionalData = saloonData.data()["additional_data"];
+        mySaloon.contactNumber = saloonData.data()['contact_number'].toString();
+        mySaloon.openTime = saloonData.data()['open_time'];
+        mySaloon.closeTime = saloonData.data()['close_time'];
+        mySaloon.appointmentInterval = saloonData.data()['appointment_interval'];
+        mySaloon.services = returnMyServicesArray(saloonData.data()["services"]);
+        mySaloon.gallery = saloonData.data()['gallery'] == null
+            ? []
+            : saloonData.data()['gallery'];
+        mySaloon.galleryLimit = saloonData.data()['gallery_limit'];
+        mySaloon.reviews = saloonData.data()['reviews'] == null
+            ? []
+            : saloonData.data()['reviews'];
+        print('saloon data getting finished');
       } on PlatformException catch(e){
         print(e.message);
       }
     notifyListeners();
   }
 
-  Future<void> addImageToTheGallery(File image)async{
+  Future<bool> addImageToTheGallery(File image)async{
+    print('upload running');
     final currentGallerySize = mySaloon.gallery.length;
+    final currentGallery = mySaloon.gallery;
 
-    print(currentGallerySize);
-    print(mySaloon.galleryLimit);
+
+    // currentGallery.add({
+    //   'name' : "galleryImageName",
+    //   'url' : "url",
+    //   'date_time' : "time"
+    // });
+
+    //print(currentGallery);
 
     if(currentGallerySize < mySaloon.galleryLimit){
       final user = FirebaseAuth.instance.currentUser;
-      final time = Timestamp.now();
+      final time = DateTime.now();
       final currentGallery = mySaloon.gallery;
       try{
         final galleryImageName = 'gallery_image_'+"$time";
         final ref = FirebaseStorage.instance.ref().child(user.uid).child(galleryImageName);
 
-        await ref.putFile(image).whenComplete(()async {
-          final url = await ref.getDownloadURL();
-          final data = {
-            'name' : galleryImageName,
-            'url' : url,
-            'date_time': time
-          };
-          currentGallery.add(data);
-          await _saloons.doc(mySaloon.id).collection('data').doc(mySaloon.id)
-          .update({
-            'gallery' : currentGallery,
-          });
+        await ref.putFile(image);
+        final url = await ref.getDownloadURL();
+        print('##########################################upload complete###################################');
+        print("*******************************************");
+        final List<dynamic> arr=[...mySaloon.gallery];
+        arr.add({
+          'name' : galleryImageName,
+          'url' : url,
+          'date_time' : time
         });
-        allGalleryImages = currentGallery;
+        print(arr);
+        log('writting url to db');
+        await _saloons.doc(mySaloon.id).collection('data').doc(mySaloon.id)
+            .update({
+          'gallery' : arr
+        }).then((value){
+          log('db updated');
+        });
+
+        mySaloon.gallery = arr;
         notifyListeners();
-
-      }on PlatformException catch(e){
-
+        return true;
+      }on FirebaseException catch(e){
+        print("This is error you got"+e.message);
+        throw e;
       }
     }
+    else{
+      return false;
+    }
+
+
+  }
+
+  Future<void> deleteImage(dynamic object)async{
+
+    final user = FirebaseAuth.instance.currentUser;
+    try{
+      final ref = await FirebaseStorage.instance.ref().child(user.uid).child(object['name']).delete();
+      mySaloon.gallery.remove(object);
+
+      await _saloons.doc(mySaloon.id).collection('data').doc(mySaloon.id)
+          .update({
+        'gallery' : mySaloon.gallery
+      }).then((value){
+        log('db updated');
+      });
+
+
+        notifyListeners();
+      }on FirebaseException catch(e){
+        print("This is error you got"+e.message);
+        throw e;
+      }
+
 
 
   }

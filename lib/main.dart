@@ -1,9 +1,11 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:saloon_dashboard/providers/appointment_provider.dart';
 import 'package:saloon_dashboard/providers/auth_provider.dart';
 import 'package:saloon_dashboard/providers/saloon_provider.dart';
 import 'package:saloon_dashboard/providers/saloon_setup_provider.dart';
+import 'package:saloon_dashboard/screens/appointments_screen/all_appointments.dart';
 import 'package:saloon_dashboard/screens/gallery/add_image.dart';
 import 'package:saloon_dashboard/screens/gallery/gallery_screen.dart';
 import 'file:///C:/Users/ADMIN/AndroidStudioProjects/saloon_dashboard/lib/screens/dashboard/dashboard_screen.dart';
@@ -26,6 +28,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (ctx)=>AuthProvider()),
         ChangeNotifierProvider(create: (ctx) => SaloonProvider()),
         ChangeNotifierProvider(create: (ctx) => SaloonSetupProvider()),
+        ChangeNotifierProvider(create: (ctx) => AppointmentProvider()),
       ],
       child: Consumer<AuthProvider>(
         builder: (ctx,auth,_){
@@ -56,6 +59,7 @@ class MyApp extends StatelessWidget {
               AddServiceScreen.id : (ctx) => AddServiceScreen(),
               GalleryScreen.id : (ctx) => GalleryScreen(),
               AddImageScreen.id : (ctx) => AddImageScreen(),
+              AllAppointmentsScreen.id : (ctx) => AllAppointmentsScreen(),
             },
           );
         },
