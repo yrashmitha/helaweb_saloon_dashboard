@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:saloon_dashboard/models/appointment.dart';
 
 class AppointmentProvider with ChangeNotifier {
@@ -51,7 +52,114 @@ class AppointmentProvider with ChangeNotifier {
 
     notifyListeners();
   }
+
+
+  Future<bool> markAsCompleteAppointment(String id) async {
+    try {
+      var res = await FirebaseFirestore.instance.collection('appointments')
+          .doc(id)
+          .update({'status': 'COMPLETED'})
+          .then((_) {
+        return true;
+      })
+          .catchError((e) {
+        throw e;
+      });
+      await getThisAppointmentDetails(id);
+      if(res){
+        return true;
+      }
+      else {
+        return false;
+      }
+
+    } on PlatformException catch (e) {
+      throw e;
+    }
+
+  }
+
+
+  SaloonAppointment dummyAppointment = SaloonAppointment(
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      0,
+      "",
+      "",
+      null,
+      false,
+      []);
+  Future<void> getThisAppointmentDetails(String id) async {
+    log("Appointment getting running");
+
+    var res = await FirebaseFirestore.instance.collection('appointments').doc(id).get().then((doc) {
+      dummyAppointment.appointmentId = doc.id;
+      dummyAppointment.saloonId = doc.data()['saloon_id'];
+      dummyAppointment.saloonName = doc.data()['saloon_name'];
+      dummyAppointment.saloonContactNumber = doc.data()['saloon_contact_number'];
+      dummyAppointment.userId = doc.data()['user_id'];
+      dummyAppointment.userName = doc.data()['user_name'];
+      dummyAppointment.userContactNumber = doc.data()['user_contact_number'];
+      dummyAppointment.status = doc.data()['status'];
+      dummyAppointment.price = doc.data()['price'];
+      dummyAppointment.userImage = doc.data()['user_image'];
+      dummyAppointment.saloonImage = doc.data()['saloon_image'];
+      dummyAppointment.dateTime = doc.data()['date_time'];
+      dummyAppointment.isReviewed = doc.data()['is_reviewed'] != null ? doc.data()['is_reviewed'] : false;
+      dummyAppointment.bookedServices = doc.data()['services'];
+      log("Appointment getting over");
+      notifyListeners();
+    }).catchError((err) {
+      print(err);
+    });
+  }
+
+  Future<bool> cancelAppointment(String id) async {
+    log("hi");
+    try {
+      await FirebaseFirestore.instance.collection('appointments')
+          .doc(id)
+          .update({'status': 'CANCELLED'})
+          .then((_) {
+        return true;
+      })
+          .catchError((e) {
+        throw e;
+      });
+    } on PlatformException catch (e) {
+      throw e;
+    }
+    return false;
+  }
+
+  Future<bool> acceptAppointment(String id) async {
+    log("hi");
+    try {
+      await FirebaseFirestore.instance.collection('appointments')
+          .doc(id)
+          .update({'status': 'ACCEPTED'})
+          .then((_) {
+        return true;
+      })
+          .catchError((e) {
+        throw e;
+      });
+
+      await getThisAppointmentDetails(id);
+    } on PlatformException catch (e) {
+      throw e;
+    }
+    return false;
+  }
+
 }
+
 
 Map x = {
   'saloon_id': 'sFJLjuDIiT6ZyxeGQ8IA',

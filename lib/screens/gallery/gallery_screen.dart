@@ -59,18 +59,25 @@ class _GalleryScreenState extends State<GalleryScreen> {
               itemBuilder: (context, index) {
                 return Padding(
                   padding: const EdgeInsets.all(2.0),
-                  child: Container(
-                      height: 200,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          image: DecorationImage(
-                              fit: BoxFit.cover,
-                              image: NetworkImage(galleryList[index]['url'],
-                                  scale: 1.5))),
-                      child: Align(
-                        alignment: Alignment.bottomRight,
+                  child: Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(5),
+                        child: CachedNetworkImage(
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          placeholder: (ctx, url) {
+                            return Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          },
+                          imageUrl: galleryList[index]['url'],
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             IconButton(
                                 icon: Icon(Icons.visibility),
@@ -97,13 +104,17 @@ class _GalleryScreenState extends State<GalleryScreen> {
                                   saloonProvider
                                       .deleteImage(galleryList[index])
                                       .then((value) {
-                                    _key.currentState.showSnackBar(
-                                        SnackBar(content: Text("Deleted!"),behavior: SnackBarBehavior.floating,));
+                                    _key.currentState.showSnackBar(SnackBar(
+                                      content: Text("Deleted!"),
+                                      behavior: SnackBarBehavior.floating,
+                                    ));
                                   });
                                 }),
                           ],
                         ),
-                      )),
+                      )
+                    ],
+                  ),
                 );
               },
               itemCount: galleryList.length,
@@ -128,3 +139,49 @@ class _GalleryScreenState extends State<GalleryScreen> {
 // imageUrl: galleryList[index].url
 // ),
 // ),IconButton(icon: Icon(Icons.delete,color: Theme.of(context).errorColor,), onPressed: (){})
+
+// Container(
+// height: 200,
+// decoration: BoxDecoration(
+// borderRadius: BorderRadius.circular(10),
+// image: DecorationImage(
+// fit: BoxFit.cover,
+// image: NetworkImage(galleryList[index]['url'],
+// scale: 1.5))),
+// child: Align(
+// alignment: Alignment.bottomRight,
+// child: Row(
+// mainAxisAlignment: MainAxisAlignment.end,
+// children: [
+// IconButton(
+// icon: Icon(Icons.visibility),
+// onPressed: () {
+// Navigator.push(
+// context,
+// PageRouteTransition(
+// builder: (ctx) {
+// return ViewImage(
+// url: galleryList[index]['url'],
+// );
+// },
+// animationType: AnimationType.scale,
+// fullscreenDialog: true,
+// ),
+// );
+// }),
+// IconButton(
+// icon: Icon(
+// Icons.delete,
+// color: Theme.of(context).errorColor,
+// ),
+// onPressed: () {
+// saloonProvider
+//     .deleteImage(galleryList[index])
+//     .then((value) {
+// _key.currentState.showSnackBar(
+// SnackBar(content: Text("Deleted!"),behavior: SnackBarBehavior.floating,));
+// });
+// }),
+// ],
+// ),
+// )),

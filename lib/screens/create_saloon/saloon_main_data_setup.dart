@@ -54,7 +54,7 @@ class _MainSaloonDataSetupScreenState extends State<MainSaloonDataSetupScreen> {
   final picker = ImagePicker();
 
   Future getImage() async {
-    final pickedFile = await picker.getImage(source: ImageSource.gallery,maxHeight: 200);
+    final pickedFile = await picker.getImage(source: ImageSource.gallery,maxHeight: 2000);
 
     setState(() {
       if (pickedFile != null) {

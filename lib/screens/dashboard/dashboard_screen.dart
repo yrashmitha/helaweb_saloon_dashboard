@@ -46,37 +46,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final media = MediaQuery.of(context).size;
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(),
-        drawer: Container(
-          color: ThemeData.dark().secondaryHeaderColor,
-          height: media.height,
-          width: media.width *.7,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              RaisedButton(
-                onPressed: (){
-                  Navigator.popAndPushNamed(context,AllAppointmentsScreen.id );
-                },
-                child: Text("Appointments"),),
-              RaisedButton(
-                  onPressed: (){
-                Navigator.popAndPushNamed(context, ServicesScreen.id);
-              },
-              child: Text("Services"),),
-              RaisedButton(
-                onPressed: (){
-                  Navigator.popAndPushNamed(context, GalleryScreen.id);
-                },
-                child: Text("Gallery"),),
-              RaisedButton(onPressed: (){
-                Provider.of<AuthProvider>(context,listen: false).signOutGoogle();
-              },
-                child: Text('Log out'),
-                color: kMainYellowColor,
-              )
-            ],
-          ),
+        appBar: AppBar(
+          title: Text('Hela salon Vendor'),
         ),
         body: loading ? Center(child: CircularProgressIndicator(),) :
         RefreshIndicator(

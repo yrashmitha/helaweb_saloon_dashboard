@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:route_transitions/route_transitions.dart';
 import 'package:saloon_dashboard/common_functions/functions.dart';
 import 'package:saloon_dashboard/providers/appointment_provider.dart';
+
+import 'appointment_detais.dart';
 
 class TabContent extends StatelessWidget {
   final list;
@@ -41,7 +44,8 @@ class TabContent extends StatelessWidget {
               : ListView.builder(
               itemCount: list.length,
               itemBuilder: (ctx, index) {
-                return Padding(
+                //print(list[index].appointmentId);
+                    return Padding(
                   padding: const EdgeInsets.only(
                       bottom: 8.0, right: 8, left: 8),
                   child: Card(
@@ -100,18 +104,18 @@ class TabContent extends StatelessWidget {
                         ),
                         trailing: GestureDetector(
                           onTap: () {
-                            // Navigator.push(
-                            //     context,
-                            //     PageRouteTransition(
-                            //         animationType:
-                            //         AnimationType.slide_right,
-                            //         builder: (ctx) {
-                            //           return AppointmentDetailsScreen(
-                            //             appointmentId:
-                            //             list[index].appointmentId,
-                            //             fromBookingPage: false,
-                            //           );
-                            //         }));
+                            Navigator.push(
+                                context,
+                                PageRouteTransition(
+                                    animationType:
+                                    AnimationType.slide_right,
+                                    builder: (ctx) {
+                                      return AppointmentDetailsScreen(
+                                        appointmentId:
+                                        list[index].appointmentId,
+                                        fromBookingPage: false,
+                                      );
+                                    }));
                           },
                           child: Icon(
                             Icons.arrow_forward,

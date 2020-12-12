@@ -101,6 +101,8 @@ class SaloonProvider with ChangeNotifier {
           .getAppointmentsFromDb('sFJLjuDIiT6ZyxeGQ8IA');
 
       print('saloon data getting finished');
+      print(FirebaseAuth.instance.currentUser.uid);
+
     } else {
       print('we have no document');
     }
